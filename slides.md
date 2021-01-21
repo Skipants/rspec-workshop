@@ -87,6 +87,7 @@ The code under test. Part of the "Act" step.
 Fill out the spec in spec/lib/string_spec.rb
 
 Goal: Just getting comfortable writing a test for something already written
+
 Time: 10 minutes
 
 Tips:
@@ -119,13 +120,13 @@ Examples:
 
 - Not actually the conventional place for integration tests for RSpec. These should be in `spec/requests/`
 
+# File Convention Exceptions
+
 `spec/requests/`
 
 - https://relishapp.com/rspec/rspec-rails/v/4-0/docs/request-specs/request-spec
 - RSpec Rails' wrapper for integration tests
 - They tend to follow how multiple method calls work together. More on these later.
-
-# File Convention Exceptions
 
 `spec/routing/`
 
@@ -154,7 +155,7 @@ Pros:
 # Andrew's Opinions™ on TDD
 Cons:
 
-- Difficult to do when adding code to something already untested. Often untested code wasn't written well for allowing tests and you'll need to get a full understanding of the code when writing tests for it (maybe that's a pro?)
+- Extra work is required when testing untested legacy code. Often untested code wasn't written well for allowing tests and you'll need to get a full understanding of the code when writing tests for it.
 - Writing tests requires you do know what your inputs and outputs will look like, but you might not understand what the code should look like until you've tried different things first
 - It's a different way of thinking that needs to be practiced.
 
@@ -169,21 +170,23 @@ Given a class Months, implement a method that calculates the average amount of d
 Class is located in `lib/months.rb`
 
 Constraints:
-  - Write a test before even typing anything into `lib/months.rb`
+- Write a test before even typing anything into `lib/months.rb`
 
 Goal: To get comfortable with TDD
-Time: 30+ minutes
+
+Time: 20 minutes
 
 # Unit Test TDD Exercise
 
 Tips:
 
 - You will need to create a test file for class lib/months.rb given the convention we talked about
-- Use `Months::DAYS_IN_MONTH` to make this less about figuring out Rails' builtins and more just worrying about the problem
-- Don't worry about good code or the implementation. Just testing first.
-- The method may be a class or instance method. arguments may be passed to method or part of method signature
+- Don't worry about good code; our goal here is testing first.
+- When requiring `spec_helper`, application files aren't loaded by default. Use `require_relative '/path/to/file/'` to load `lib/months.rb`.
+- Use `Months::DAYS_IN_MONTH` when implementing the feature to make this less about figuring out Date/Time methods and more just worrying about the problem
+- Hardcode the values in your test rather than using `Months::DAYS_IN_MONTH` there.
 - Run the spec file as often as possible with `bundle exec rspec filename`
-- Hardcode the values you in your expecation. Don't use `Months::DAYS_IN_MONTH` in your spec.
+- Use RSpec's `be_within` matcher to test decimal values.
 
 # Request (Integration) Tests
 
@@ -285,10 +288,6 @@ context ".full_name" do
     expect(full_name(first_name, last_name)).to eq("Doe, John")
   end
 
-  it "can use a different seperator" do
-    expect(full_name(first_name, last_name, ":")).to eq("Doe: John")
-  end
-
   context "with a different name" do
     let(:first_name) { "Jane" }
 
@@ -307,14 +306,8 @@ context ".full_name" do
     expect(full_name("John", "Doe")).to eq("Doe, John")
   end
 
-  it "can use a different seperator" do
-    expect(full_name("John", "Doe", ":")).to eq("Doe: John")
-  end
-
-  context "with a different first name" do
-    it "works" do
-      expect(full_name("Jane", "Doe")).to eq("Doe, Jane")
-    end
+  it "works with a different first name" do
+    expect(full_name("Jane", "Doe")).to eq("Doe, Jane")
   end
 end
 ```
@@ -355,30 +348,34 @@ Implement the following:
 
 - A user can ping people by name via `POST /ping` with a name, greeting, and company
 - The greeting must always be "hello" and the company must always be "financeit"
-- A user can only get help from `GET /help` if they have pinged `@skipants`. Otherwise the user gets a 404 response.
+- A user can only get help from `GET /help` if they have sent a `POST /ping` with `name=@skipants`. Otherwise the user gets a 404 response.
 
 Constraints:
 
-- Write an integration test before doing any code
-- Write an invariant of the test -- if you ping someone who is NOT `@skipants`, then you should get a 404 from `GET /help`
+- Write an integration test before doing any code.
+- Write an invariant of the test -- if you have called `POST /ping` with a name other than `@skipants`, then you should get a 404 from `GET /help`.
 
 Goal: To get more comfortable with TDD and integration tests
+
 Time: 45 minutes
 
 # Request Spec TDD Exercise
 
 Tips:
 
-- Start with a file in `spec/requests/`. Don't sweat the filename -- they are more subjective than unit test files.
+- Each integration test should be calling both the `POST /ping` and `GET /help` in the same test.
+- Start with a file in `spec/requests/`. Don't sweat the filename -- integration test names are more subjective than unit test files.
 - Use a base set of parameters named `valid_params` and use `Hash#merge` to highlight the difference in state between your base case and the invariant
 - You don't need to save `greeting` or `company` to the database. That constraint is just there to enforce and get you used to the usage of `valid_params`.
-- Delete any guard assertions in the middle of your test when you're finished. ie. If you wrote an `expect` between the two requests, get rid of it after. It makes tests harder to follow later on and is only really useful for debugging.
+- `GET /help` should not be taking in any parameters.
 
 # Factory Bot
 
 A gem used for organizing fixture data. Instead of passing the same parameters over and over to `.create` a database record, you can use factory definitions and traits to abstract that stuff away. It also provides a way to organize fixtures in such a way that they are reusable among different tests.
 
 https://github.com/thoughtbot/factory_bot/blob/master/GETTING_STARTED.md
+
+# Factory Bot
 
 ```ruby
 FactoryBot.define do
@@ -395,17 +392,16 @@ end
 
 This makes a fixture for the `Employee` model. You can then create an employee with this base set of data in the database in your test like `create(:employee)`
 
-You can also use a `Employee` object without creating a database record with `build`. `employee = build(:employee)`.
+# Factory Bot
 
-If you want different data on your fixture, you can also pass it to `create` or `build`: `build(:employee, login: "johndoe")`
-
-Traits are a nice way to describe a type of a fixture so it can be reused. It also inherits the base set of parameters (login, email in this case) `employee = build(:employee, :suspended)`
-
-Read the docs for more!
+- You can also use a `Employee` object without creating a database record with `build`: `employee = build(:employee)`
+- If you want different data on your fixture, you can also pass it to `create` or `build`: `build(:employee, login: "johndoe")`
+- Traits are a nice way to describe a type of a fixture so it can be reused. It also inherits the base set of parameters (login, email in this case) `employee = build(:employee, :suspended)`
+- Read the docs for more!
 
 # Controller Specs
 
-Basically unit tests for controllers. RSpec Rails provides some helper methods to make these simpler.
+Unit tests for controllers. RSpec Rails provides some helper methods to make these simpler.
 
 https://relishapp.com/rspec/rspec-rails/v/4-0/docs/controller-specs
 
@@ -426,6 +422,12 @@ RSpec.describe TeamsController do
 end
 ```
 
+# Controller Spec Helpers
+
+- Controller specs have access to a `response` object and matchers like `render_template` in the same way integration specs do.
+- Instead of a relative URL, controller specs request methods like `get` and `post` call the method directly on the controller. in the previous example, instead of `get /teams`, we call `get :index`.
+- `assigns` is used in the same fashion as integration tests. It maps to the instance variable assigned in the controller. You probably want to test what a controller `assigns` because it is like the output of a controller similar to how a return value is the output of a method.
+
 # Controller Spec + Factory Bot Exercise
 
 Reimplement the previous integration test for pinging @skipants as a controller test with one new requirement: The user can only ping @skipants once per day.
@@ -435,6 +437,7 @@ Constraints:
 - Set up the state of the test using Factory Bot.
 
 Goal: To get comfortable with controller specs and Factory Bot
+
 Time: 45 minutes
 
 Tips:
@@ -444,9 +447,11 @@ Tips:
 - Try using a trait to automatically make a ping with a name of "@skipants". You probably wouldn't do this normally as it's simpler to just build
 
 
-# Mocks and Stubs
+# Stubs and Mocks
 
 https://relishapp.com/rspec/rspec-mocks/docs
+
+# Stubs
 
 https://relishapp.com/rspec/rspec-mocks/v/3-10/docs/basics/allowing-messages
 
@@ -465,9 +470,11 @@ context "#barks?" do
 end
 ```
 
-You can make a mock of an object using `instance_double`. RSpec will use this to verify that any calls made on the object are only ones that an instance of that object would accept.
+# Mocks
 
 https://relishapp.com/rspec/rspec-mocks/v/3-10/docs/verifying-doubles/using-an-instance-double
+
+You can make a mock of an object using `instance_double`. RSpec will use this to verify that any calls made on the object are only ones that an instance of that object would accept.
 
 ```ruby
 it 'notifies the console' do
@@ -480,23 +487,24 @@ it 'notifies the console' do
 end
 ```
 
-You can not call methods from a class on a double unless you've already stubbed them via `allow` or are checking them via `expect...receive`,
+You can not call methods from a class on a double unless you've already stubbed them via `allow` or are checking them via `expect...receive`.
 
 # Controller Spec Stub Exercise
 
-Reimplement the previous controller test for pinging @skipants as with one new requirement: The user can only ping @skipants 5 times per month.
+Reimplement the previous controller test for pinging @skipants using mocks and stubs.
 
 Constraints:
 
 - Set up the state of the test using mocks and/or stubs.
 
 Goal: To get comfortable with mocking and stubbing
-Time: 20 minutes
+
+Time: 30 minutes
 
 Tips:
 
-- There's more than one way to do it. You will probably need stubs but it can definitely be done without mocks
-- Only your setup should change. Calling the controller method and
+- Instead of reading from the database, return mocked objects from it instead.
+- Classes are also objects, and therefore you can use `allow(...).to receive` to stub methods on them as well.
 
 # Tips For Testing
 
