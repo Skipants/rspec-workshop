@@ -92,6 +92,7 @@ Time: 10 minutes
 
 Tips:
 
+- Run the spec with `bundle exec rspec` or `bundle exec rspec spec/lib/string_spec.rb`
 - Don't overthink it
 - You probably don't need to do any setup
 
