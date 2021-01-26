@@ -82,6 +82,12 @@ The code under test. Part of the "Act" step.
 ```
 `expect...to` is RSpec's way of making an assertion. Part of the "Assert" step.
 
+# Running Your Tests
+
+- You run your whole suite with `bundle exec rspec`.
+- You can run one file with `bundle exec rspec filename`
+- Check `rspec --help` to see all the commands available
+
 # Unit Test Exercise
 
 Fill out the spec in spec/lib/string_spec.rb
@@ -318,28 +324,7 @@ Now it's a lot easer to tell how the state differs between each test.
 # A Note on Setting Up Reusable State
 With more complicated state, you can avoid reusing the same data over and over again by providing a base set of parameters that works for the base case and mutate it in each test. eg.:
 
-```ruby
-let(:valid_params) do
-  {
-    first_name: "John",
-    last_name: "Doe",
-    age: 30,
-    city: "Toronto",
-  }
-end
-
-context ".lives_here?" do
-  it "is true" do
-    expect(lives_here?(valid_params)).to eq(true)
-  end
-
-  it "is false for people outside of Toronto" do
-    params = valid_params.merge(city: "Winnipeg")
-
-    expect(lives_here?(params)).to eq(false)
-  end
-end
-```
+_Check out reusable_state_example.rb_
 
 Now you can reuse the other parameters that we need for this method without having to repeat yourself in each test.
 
@@ -381,9 +366,14 @@ https://github.com/thoughtbot/factory_bot/blob/master/GETTING_STARTED.md
 ```ruby
 FactoryBot.define do
   factory :employee do
+    # attributes
     login { 'employee' }
     email { 'employee@example.com' }
 
+    # association
+    supervisor
+
+    # trait
     trait :suspended do
       suspended_at { DateTime.current }
     end
@@ -391,7 +381,7 @@ FactoryBot.define do
 end
 ```
 
-This makes a fixture for the `Employee` model. You can then create an employee with this base set of data in the database in your test like `create(:employee)`
+You can now save an employee with this base set of data to the database in your test with `create(:employee)`
 
 # Factory Bot
 
@@ -431,7 +421,7 @@ end
 
 # Controller Spec + Factory Bot Exercise
 
-Reimplement the previous integration test for pinging @skipants as a controller test with one new requirement: The user can only ping @skipants once per day.
+Reimplement the previous integration test for pinging @skipants as a controller test on HelpController with one new requirement: The user gets a 200 from `GET /help` only if they pinged @skipants once per day. If they pinged more than once they get a 404 from `/help`.
 
 Constraints:
 
@@ -439,7 +429,9 @@ Constraints:
 
 Goal: To get comfortable with controller specs and Factory Bot
 
-Time: 45 minutes
+Time: 30 minutes
+
+# Controller Spec + Factory Bot Exercise
 
 Tips:
 
@@ -475,12 +467,11 @@ end
 
 https://relishapp.com/rspec/rspec-mocks/v/3-10/docs/verifying-doubles/using-an-instance-double
 
-You can make a mock of an object using `instance_double`. RSpec will use this to verify that any calls made on the object are only ones that an instance of that object would accept.
+You can make a mock of an object using `instance_double`. RSpec will use this to verify that any calls made on the object are only ones that an instance of that object would accept. The string passed to `instance_double` needs to be the class name.
 
 ```ruby
 it 'notifies the console' do
   notifier = instance_double("ConsoleNotifier")
-
   expect(notifier).to receive(:notify).with("suspended as")
 
   user = User.new(notifier)
@@ -490,22 +481,32 @@ end
 
 You can not call methods from a class on a double unless you've already stubbed them via `allow` or are checking them via `expect...receive`.
 
+# Creating stubs directly on mocks
+
+```ruby
+notifier = instance_double("ConsoleNotifier")
+expect(notifier).to receive(:notify).with("suspended as")
+```
+
+can simply become:
+```ruby
+notifier = instance_double("ConsoleNotifier", notify: "suspended as")
+```
 # Controller Spec Stub Exercise
 
 Reimplement the previous controller test for pinging @skipants using mocks and stubs.
-
-Constraints:
-
-- Set up the state of the test using mocks and/or stubs.
 
 Goal: To get comfortable with mocking and stubbing
 
 Time: 30 minutes
 
+# Controller Spec Stub Exercise
+
 Tips:
 
-- Instead of reading from the database, return mocked objects from it instead.
-- Classes are also objects, and therefore you can use `allow(...).to receive` to stub methods on them as well.
+- Instead of reading from the database, stub out the call to fake what the state of the database is to pass your tests.
+- Classes are also objects, and therefore you can use `allow(Class).to receive` to stub class methods as well.
+- You can combine stubs with mocks to inject mocked objects in arbitrary places in code. In other words, make your stubs return mocks you setup in your test like: `allow(Employee).to receive(:where) { [mock_1, mock_2] }`
 
 # Tips For Testing
 
