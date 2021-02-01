@@ -13,4 +13,8 @@ class Months
     "November" => 30,
     "December" => 31,
   }
+
+  def self.average(month_1, month_2, month_2)
+
+  end
 end
