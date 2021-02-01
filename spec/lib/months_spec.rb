@@ -1,5 +1,5 @@
 require 'spec_helper'
-require '../../lib/months'
+require_relative '../../lib/months'
 
 RSpec.describe Months do
   describe ".average" do

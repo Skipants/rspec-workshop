@@ -14,7 +14,7 @@ class Months
     "December" => 31,
   }
 
-  def self.average(month_1, month_2, month_2)
+  def self.average(month_1, month_2, month_3)
 
   end
 end
