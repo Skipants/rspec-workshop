@@ -1,17 +1,5 @@
 #!/usr/bin/env sh
 
-if [ -x "$(command -v asdf)" ]; then
-  asdf install ruby
-elif [ -x "$(command -v rvm)" ]; then
-  rvm install ruby-2.7.2
-elif [ -x "$(command -v rbenv)" ]; then
-  rbenv install ruby-2.7.2
-else
-  echo "Please install a ruby version manager to ensure you have the correct ruby version."
-  echo "I recommend using asdf and it's ruby plugin: https://asdf-vm.com"
-  exit 1
-fi
-
 bin/setup
 bin/rails db:test:prepare
 bundle exec rspec
