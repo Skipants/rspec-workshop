@@ -13,5 +13,14 @@ RSpec.describe Months do
     it "" do
 
     end
+
+    it "works with a leap year" do
+
+    end
+  end
+
+  describe ".correct_name?" do
+    it "is true if we pass it a correct name for a month" do
+    end
   end
 end

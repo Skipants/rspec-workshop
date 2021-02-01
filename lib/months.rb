@@ -21,4 +21,7 @@ class Months
   def self.correct_name?(month)
     DAYS_IN_MONTH[month.name] != nil
   end
+
+  def name
+  end
 end
