@@ -5,7 +5,7 @@ RSpec.describe Months do
   describe ".average" do
     # happy path
     it "" do
-      # Months.average(args)
+      # Months.average(args...)
     end
 
     # invariant
