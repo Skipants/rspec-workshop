@@ -332,14 +332,14 @@ Now you can reuse the other parameters that we need for this method without havi
 
 Implement the following:
 
-- A user can ping people by name via `POST /ping` with a name, greeting, and company
+- A user can ping people by name via `POST /pings` with a name, greeting, and company
 - The greeting must always be "hello" and the company must always be "financeit"
-- A user can only get help from `GET /help` if they have sent a `POST /ping` with `name=@skipants`. Otherwise the user gets a 404 response.
+- A user can only get help from `GET /help` if they have sent a `POST /pings` with `name=@skipants`. Otherwise the user gets a 404 response.
 
 Constraints:
 
 - Write an integration test before doing any code.
-- Write an invariant of the test -- if you have called `POST /ping` with a name other than `@skipants`, then you should get a 404 from `GET /help`.
+- Write an invariant of the test -- if you have called `POST /pings` with a name other than `@skipants`, then you should get a 404 from `GET /help`.
 
 Goal: To get more comfortable with TDD and integration tests
 
@@ -349,7 +349,7 @@ Time: 45 minutes
 
 Tips:
 
-- Each integration test should be calling both the `POST /ping` and `GET /help` in the same test.
+- Each integration test should be calling both the `POST /pings` and `GET /help` in the same test.
 - Start with a file in `spec/requests/`. Don't sweat the filename -- integration test names are more subjective than unit test files.
 - Use a base set of parameters named `valid_params` and use `Hash#merge` to highlight the difference in state between your base case and the invariant
 - You don't need to save `greeting` or `company` to the database. That constraint is just there to enforce and get you used to the usage of `valid_params`.
@@ -435,7 +435,7 @@ Time: 30 minutes
 
 Tips:
 
-- In the previous exercise you probably called the `/ping` endpoint. In this exercise you should instead save the pings straight to the database as part of your setup.
+- In the previous exercise you probably called the `/pings` endpoint. In this exercise you should instead save the pings straight to the database as part of your setup.
 - You have to create both the factory and the test file for this exercise
 - Try using a trait to automatically make a ping with a name of "@skipants". You probably wouldn't do this normally as it's simpler to just build
 
@@ -485,7 +485,7 @@ You can not call methods from a class on a double unless you've already stubbed 
 
 ```ruby
 notifier = instance_double("ConsoleNotifier")
-expect(notifier).to receive(:notify).with("suspended as")
+allow(notifier).to receive(:notify).with("suspended as")
 ```
 
 can simply become:
