@@ -487,12 +487,12 @@ You can not call methods from a class on a double unless you've already stubbed 
 
 ```ruby
 notifier = instance_double("ConsoleNotifier")
-allow(notifier).to receive(:notify).with("suspended as")
+allow(notifier).to receive(:notify) { true }
 ```
 
 can simply become:
 ```ruby
-notifier = instance_double("ConsoleNotifier", notify: "suspended as")
+notifier = instance_double("ConsoleNotifier", notify: true)
 ```
 # Controller Spec Stub Exercise
 

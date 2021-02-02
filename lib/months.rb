@@ -1,6 +1,6 @@
 class Months
-  def self.average(month_1, month_2, month_3)
-    days_in_month = {
+  def days_in_month
+    {
       "January" => 31,
       "February" => Time.days_in_month(2, Time.now.year),
       "March" => 31,
@@ -16,8 +16,11 @@ class Months
     }
   end
 
+  def self.average(month_1, month_2, month_3)
+  end
+
   def self.correct_name?(month)
-    DAYS_IN_MONTH[month.name] != nil
+    days_in_month[month.name] != nil
   end
 
   def name
