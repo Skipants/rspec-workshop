@@ -1,5 +1,5 @@
 class Months
-  def days_in_month
+  def self.days_in_month
     {
       "January" => 31,
       "February" => Time.days_in_month(2, Time.now.year),
