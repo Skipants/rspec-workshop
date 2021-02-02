@@ -108,8 +108,8 @@ Test files under `spec/` are usually 1-to-1 matches with files and their objects
 
 Examples:
 
-1. `app/models/loan.rb` => `spec/models/loan.rb`
-2. `app/controllers/loan.rb` => `spec/controllers/loans_controller.rb`
+1. `app/models/loan.rb` => `spec/models/loan_spec.rb`
+2. `app/controllers/loan.rb` => `spec/controllers/loans_controller_spec.rb`
 3. `lib/helper.rb` => `spec/lib/helper_spec.rb`
 
 # File Convention Exceptions
