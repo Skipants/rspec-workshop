@@ -154,7 +154,7 @@ This just means writing tests before rather than after writing your application 
 
 Pros:
 
-- It helps frame the problem and give you the big picture of how you can solve it
+- It helps frame the problem and give you a clear picture on how you can solve it
 - You usually end up with cleaner code because you've analyzed how it should look from the start rather than incrementally making changes
 - Gives you confidence your code works
 - Much quicker than testing in the browser
@@ -162,7 +162,7 @@ Pros:
 # Andrew's Opinions™ on TDD
 Cons:
 
-- Extra work is required when testing untested legacy code. Often untested code wasn't written well for allowing tests and you'll need to get a full understanding of the code when writing tests for it.
+- Extra work is required when testing untested legacy code. Untested code most likely makes it hard to write tests covering it because it wasn't written with tests in mind; boundaries aren't clear and do not provide a good entry point for your tests.
 - Writing tests requires you do know what your inputs and outputs will look like, but you might not understand what the code should look like until you've tried different things first
 - It's a different way of thinking that needs to be practiced.
 
@@ -190,10 +190,83 @@ Tips:
 - You will need to create a test file for class lib/months.rb given the convention we talked about
 - Don't worry about good code; our goal here is testing first.
 - When requiring `spec_helper`, application files aren't loaded by default. Use `require_relative '/path/to/file/'` to load `lib/months.rb`.
-- Use `Months::DAYS_IN_MONTH` when implementing the feature to make this less about figuring out Date/Time methods and more just worrying about the problem
-- Hardcode the values in your test rather than using `Months::DAYS_IN_MONTH` there.
+- Use `Months.days_to_months` when implementing the feature to make this less about figuring out Date/Time methods and more just worrying about the problem
+- Hardcode the values in your test rather than directly using `Months.days_to_months` inside your test.
 - Run the spec file as often as possible with `bundle exec rspec filename`
 - Use RSpec's `be_within` matcher to test decimal values.
+
+# Stubs and Mocks
+
+https://relishapp.com/rspec/rspec-mocks/docs
+
+# Stubs
+
+https://relishapp.com/rspec/rspec-mocks/v/3-10/docs/basics/allowing-messages
+
+You can stub methods on any object by using `allow(object).to receive(:method)`. This is useful for returning a certain response from a method that isn't under test but is required to get your test to work as expected.
+
+For example, setting the internal state of an object and then calling another method that depends on it:
+
+```ruby
+context "#barks?" do
+  it "barks if it had no treats today" do
+    dog = Dog.new
+    allow(dog).to receive(:treats_eaten) { 0 }
+
+    expect(dog.barks?).to eq(true)
+  end
+end
+```
+
+# Mocks
+
+https://relishapp.com/rspec/rspec-mocks/v/3-10/docs/verifying-doubles/using-an-instance-double
+
+You can make a mock of an object using `instance_double`. RSpec will use this to verify that any calls made on the object are only ones that an instance of that object would accept. The string passed to `instance_double` needs to be the class name.
+
+```ruby
+it 'notifies the console' do
+  notifier = instance_double("ConsoleNotifier")
+  allow(notifier).to receive(:notify).with("suspended as")
+
+  user = User.new(notifier)
+  user.suspend!
+end
+```
+
+You can not call methods from a class on a double unless you've already stubbed them via `allow` or are checking them via `expect...receive`.
+
+# Creating stubs directly on mocks
+
+```ruby
+notifier = instance_double("ConsoleNotifier")
+allow(notifier).to receive(:notify).with("suspended as")
+```
+
+can simply become:
+```ruby
+notifier = instance_double("ConsoleNotifier", notify: "suspended as")
+```
+
+# Stubbing and Mocking Exercise
+
+Implement the following:
+
+- A unit test for your average method that gives the correct average during a leap year using a stub
+- A unit test for `.valid?` _without_ adding code to `#name` and instead uses a mock
+
+Goal: To get comfortable with mocking and stubbing
+
+Time: 30 minutes
+
+# Stubbing and Mocking Exercise
+
+Tips:
+
+- Your leap year test should probably have 'February' as one of the months you test against
+- Determine what method you're stubbing to make it a leap year
+- `.valid?` takes in an instance of `Months`
+- Remember, `#name` should stay empty. Don't add any code there.
 
 # Request (Integration) Tests
 
@@ -440,73 +513,7 @@ Tips:
 - Try using a trait to automatically make a ping with a name of "@skipants". You probably wouldn't do this normally as it's simpler to just build
 
 
-# Stubs and Mocks
 
-https://relishapp.com/rspec/rspec-mocks/docs
-
-# Stubs
-
-https://relishapp.com/rspec/rspec-mocks/v/3-10/docs/basics/allowing-messages
-
-You can stub methods on any object by using `allow(object).to receive(:method)`. This is useful for returning a certain response from a method that isn't under test but is required to get your test to work as expected.
-
-For example, setting the internal state of an object and then calling another method that depends on it:
-
-```ruby
-context "#barks?" do
-  it "barks if it had no treats today" do
-    dog = Dog.new
-    allow(dog).to receive(:treats_eaten) { 0 }
-
-    expect(dog.barks?).to eq(true)
-  end
-end
-```
-
-# Mocks
-
-https://relishapp.com/rspec/rspec-mocks/v/3-10/docs/verifying-doubles/using-an-instance-double
-
-You can make a mock of an object using `instance_double`. RSpec will use this to verify that any calls made on the object are only ones that an instance of that object would accept. The string passed to `instance_double` needs to be the class name.
-
-```ruby
-it 'notifies the console' do
-  notifier = instance_double("ConsoleNotifier")
-  expect(notifier).to receive(:notify).with("suspended as")
-
-  user = User.new(notifier)
-  user.suspend!
-end
-```
-
-You can not call methods from a class on a double unless you've already stubbed them via `allow` or are checking them via `expect...receive`.
-
-# Creating stubs directly on mocks
-
-```ruby
-notifier = instance_double("ConsoleNotifier")
-allow(notifier).to receive(:notify).with("suspended as")
-```
-
-can simply become:
-```ruby
-notifier = instance_double("ConsoleNotifier", notify: "suspended as")
-```
-# Controller Spec Stub Exercise
-
-Reimplement the previous controller test for pinging @skipants using mocks and stubs.
-
-Goal: To get comfortable with mocking and stubbing
-
-Time: 30 minutes
-
-# Controller Spec Stub Exercise
-
-Tips:
-
-- Instead of reading from the database, stub out the call to fake what the state of the database is to pass your tests.
-- Classes are also objects, and therefore you can use `allow(Class).to receive` to stub class methods as well.
-- You can combine stubs with mocks to inject mocked objects in arbitrary places in code. In other words, make your stubs return mocks you setup in your test like: `allow(Employee).to receive(:where) { [mock_1, mock_2] }`
 
 # Tips For Testing
 
