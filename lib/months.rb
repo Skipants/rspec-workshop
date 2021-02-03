@@ -1,9 +1,11 @@
+require 'date'
+
 class Months
   def self.days_to_months
     # Do not touch!
     {
       "January" => 31,
-      "February" => ::Date.gregorian_leap?(year) ? 29 : 28,
+      "February" => ::Date.gregorian_leap?(Time.now.year) ? 29 : 28,
       "March" => 31,
       "April" => 30,
       "May" => 31,
@@ -16,7 +18,6 @@ class Months
       "December" => 31,
     }
   end
-
 
   def self.average()
     # Implement me!
